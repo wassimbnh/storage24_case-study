@@ -29,6 +29,7 @@ History rows that are already tracked are left alone, so running the sync twice 
 
 The process goes through every **pending** row, one at a time:
 
+
 1. **Is it still overdue?** If the invoice has been paid or voided since then, the event is out of date. The row becomes **skipped** ("stale event").
 2. **Claim it.** The row is switched from `pending` to **processing**, but only if it is still `pending`. If another run got there first, we leave the row alone. This is how one event never gets two payment links.
 3. **Find the bank account.** Follow invoice → park → legal entity → bank account in the invoice's currency. We never go via the customer, because one customer can rent at parks owned by different companies. If we find no account or more than one, we stop with a clear error instead of guessing.

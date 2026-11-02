@@ -9,14 +9,44 @@ export interface Invoice {
   due_date: string
 }
 
-async function getJson<T>(path: string): Promise<T> {
-  const response = await fetch(`/api${path}`)
+export interface SyncResult {
+  inserted: number
+  pending: number
+  skipped: number
+}
+
+export interface ProcessResult {
+  created: number
+  failed: number
+  skipped: number
+  not_claimed: number
+}
+
+export interface RunResult {
+  sync: SyncResult
+  process: ProcessResult
+}
+
+export interface ResetResult {
+  deleted: number
+}
+
+async function request<T>(method: 'GET' | 'POST', path: string): Promise<T> {
+  const response = await fetch(`/api${path}`, { method })
   if (!response.ok) {
-    throw new Error(`GET ${path} failed with ${response.status} ${response.statusText}`)
+    throw new Error(`${method} ${path} failed with ${response.status} ${response.statusText}`)
   }
   return response.json() as Promise<T>
 }
 
 export function fetchInvoices(): Promise<Invoice[]> {
-  return getJson<Invoice[]>('/invoices')
+  return request<Invoice[]>('GET', '/invoices')
+}
+
+export function runTrigger(): Promise<RunResult> {
+  return request<RunResult>('POST', '/run')
+}
+
+export function resetTracking(): Promise<ResetResult> {
+  return request<ResetResult>('POST', '/reset')
 }
