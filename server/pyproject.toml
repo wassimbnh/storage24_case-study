@@ -1,0 +1,19 @@
+[project]
+name = "storage24-server"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.162.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["."]  # server modules (database, sync, main) are imported top-level
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
