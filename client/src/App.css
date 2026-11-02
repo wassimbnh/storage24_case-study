@@ -1,0 +1,232 @@
+/* ---------- Page ---------- */
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.page__header {
+  margin-bottom: 32px;
+}
+
+.page__eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.page__title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page__subtitle {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+}
+
+/* ---------- Grid ---------- */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* ---------- Invoice card ---------- */
+
+.invoice-card {
+  --accent: var(--border);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 20px 18px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+/* Status-colored stripe along the top edge */
+.invoice-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--accent);
+}
+
+.invoice-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.invoice-card--open { --accent: var(--open-fg); }
+.invoice-card--overdue { --accent: var(--overdue-fg); }
+.invoice-card--paid { --accent: var(--paid-fg); }
+.invoice-card--void { --accent: var(--void-fg); }
+
+.invoice-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.invoice-card__id {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.invoice-card__customer {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.invoice-card__amount {
+  margin: 4px 0 20px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-card--void .invoice-card__amount {
+  color: var(--text-subtle);
+  text-decoration: line-through;
+}
+
+.invoice-card__details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: auto 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.invoice-card__details dt {
+  margin-bottom: 2px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+.invoice-card__details dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-card--overdue .invoice-card__details time {
+  color: var(--overdue-fg);
+}
+
+/* ---------- Status chip ---------- */
+
+.chip {
+  --chip-fg: var(--void-fg);
+  --chip-bg: var(--void-bg);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.chip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.chip--open { --chip-fg: var(--open-fg); --chip-bg: var(--open-bg); }
+.chip--overdue { --chip-fg: var(--overdue-fg); --chip-bg: var(--overdue-bg); }
+.chip--paid { --chip-fg: var(--paid-fg); --chip-bg: var(--paid-bg); }
+.chip--void { --chip-fg: var(--void-fg); --chip-bg: var(--void-bg); }
+
+/* ---------- Loading skeleton ---------- */
+
+.invoice-card--skeleton {
+  min-height: 210px;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--bg) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.invoice-card--skeleton:hover {
+  transform: none;
+  box-shadow: var(--shadow);
+}
+
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .invoice-card,
+  .invoice-card--skeleton {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ---------- Notices ---------- */
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+
+.notice--error {
+  background: var(--overdue-bg);
+  border-color: transparent;
+  color: var(--overdue-fg);
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 480px) {
+  .page {
+    padding: 32px 16px 48px;
+  }
+
+  .page__title {
+    font-size: 1.625rem;
+  }
+}

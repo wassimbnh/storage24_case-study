@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Request
 
 from database import init_db, list_tracking_rows, reset_tracking
+from invoices import list_invoices
 from processing import process_pending
 from sync import sync_tracking
 
@@ -40,6 +41,11 @@ def run_process(db: sqlite3.Connection = Depends(get_db)):
 def run_all(db: sqlite3.Connection = Depends(get_db)):
     """Sync then process: one full pass of the trigger."""
     return {"sync": sync_tracking(db), "process": process_pending(db)}
+
+
+@app.get("/invoices")
+def get_invoices(db: sqlite3.Connection = Depends(get_db)):
+    return list_invoices(db)
 
 
 @app.get("/tracking")
