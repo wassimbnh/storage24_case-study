@@ -1,14 +1,17 @@
+import logging
 import sqlite3
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Request
 
 from database import init_db, list_tracking_rows, reset_tracking
+from processing import process_pending
 from sync import sync_tracking
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     app.state.db = init_db()
     try:
         yield
@@ -26,6 +29,17 @@ def get_db(request: Request) -> sqlite3.Connection:
 @app.post("/sync")
 def run_sync(db: sqlite3.Connection = Depends(get_db)):
     return sync_tracking(db)
+
+
+@app.post("/process")
+def run_process(db: sqlite3.Connection = Depends(get_db)):
+    return process_pending(db)
+
+
+@app.post("/run")
+def run_all(db: sqlite3.Connection = Depends(get_db)):
+    """Sync then process: one full pass of the trigger."""
+    return {"sync": sync_tracking(db), "process": process_pending(db)}
 
 
 @app.get("/tracking")
