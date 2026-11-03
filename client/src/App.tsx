@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './App.css'
 import {
   fetchInvoices,
@@ -59,6 +59,15 @@ function App() {
     }
   }, [])
 
+  // Run and Reset change which invoices have a payment link, so reload the cards afterwards.
+  const reloadInvoices = useCallback(async () => {
+    try {
+      setState({ kind: 'loaded', invoices: await fetchInvoices() })
+    } catch (error) {
+      setState({ kind: 'error', message: errorMessage(error) })
+    }
+  }, [])
+
   async function handleRun() {
     setBusy('run')
     try {
@@ -66,6 +75,7 @@ function App() {
     } catch (error) {
       setLastAction({ kind: 'error', message: errorMessage(error) })
     } finally {
+      await reloadInvoices()
       setBusy(null)
     }
   }
@@ -77,6 +87,7 @@ function App() {
     } catch (error) {
       setLastAction({ kind: 'error', message: errorMessage(error) })
     } finally {
+      await reloadInvoices()
       setBusy(null)
     }
   }

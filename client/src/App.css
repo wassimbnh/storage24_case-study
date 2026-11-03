@@ -307,6 +307,258 @@
 
 /* ---------- Small screens ---------- */
 
+.btn--small {
+  min-height: 30px;
+  padding: 0 12px;
+  font-size: 0.8125rem;
+  box-shadow: none;
+}
+
+/* ---------- Invoice with a payment link ---------- */
+
+.invoice-card--has-link {
+  border-color: var(--paid-fg);
+  box-shadow:
+    0 0 0 1px var(--paid-fg),
+    var(--shadow);
+}
+
+.invoice-card__link {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--paid-bg);
+}
+
+.link-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--paid-fg);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.link-flag__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--paid-fg);
+  color: var(--surface);
+  font-size: 0.6875rem;
+}
+
+.btn--link-action {
+  width: 100%;
+  min-height: 34px;
+  background: var(--paid-fg);
+  color: var(--surface);
+  font-size: 0.8125rem;
+}
+
+.btn--link-action:hover {
+  opacity: 0.88;
+}
+
+/* ---------- Payment link modal ---------- */
+
+.modal {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 48px -12px rgb(16 24 40 / 0.25);
+}
+
+.modal::backdrop {
+  background: rgb(12 17 29 / 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.modal[open] {
+  animation: modal-in 160ms ease-out;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.modal__panel {
+  padding: 24px;
+}
+
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.modal__eyebrow {
+  margin: 0 0 2px;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.modal__title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.modal__subtitle {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.modal__close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal__close:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.modal__close:focus-visible {
+  outline: 2px solid var(--open-fg);
+  outline-offset: 2px;
+}
+
+.modal__section + .modal__section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.modal__label {
+  margin: 0 0 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+.modal__note {
+  margin: 10px 0 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.link-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--paid-bg);
+}
+
+.link-box__url {
+  color: var(--paid-fg);
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+  word-break: break-all;
+  user-select: all;
+}
+
+.link-box__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.link-box__meta {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.account {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.account__row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.account__row + .account__row {
+  border-top: 1px solid var(--border);
+}
+
+.account__row dt {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.account__row dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.account__mono {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal[open] {
+    animation: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .account__row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .modal__panel {
+    padding: 20px;
+  }
+}
+
 @media (max-width: 480px) {
   .page {
     padding: 32px 16px 48px;

@@ -1,10 +1,17 @@
+import { useState } from 'react'
 import type { Invoice } from '../api.ts'
 import { formatAmount, formatDate } from '../format.ts'
+import { PaymentLinkModal } from './PaymentLinkModal.tsx'
 import { StatusChip } from './StatusChip.tsx'
 
 export function InvoiceCard({ invoice }: { invoice: Invoice }) {
+  const [linkOpen, setLinkOpen] = useState(false)
+  const link = invoice.payment_link
+
   return (
-    <article className={`invoice-card invoice-card--${invoice.status}`}>
+    <article
+      className={`invoice-card invoice-card--${invoice.status} ${link ? 'invoice-card--has-link' : ''}`}
+    >
       <header className="invoice-card__header">
         <span className="invoice-card__id">#{invoice.id}</span>
         <StatusChip status={invoice.status} />
@@ -25,6 +32,29 @@ export function InvoiceCard({ invoice }: { invoice: Invoice }) {
           </dd>
         </div>
       </dl>
+
+      {link && (
+        <div className="invoice-card__link">
+          <span className="link-flag">
+            <span className="link-flag__icon" aria-hidden="true">
+              ✓
+            </span>
+            Payment link created
+          </span>
+          <button
+            type="button"
+            className="btn btn--link-action"
+            onClick={() => setLinkOpen(true)}
+            aria-haspopup="dialog"
+          >
+            View link &amp; routing
+          </button>
+        </div>
+      )}
+
+      {link && linkOpen && (
+        <PaymentLinkModal invoice={invoice} link={link} onClose={() => setLinkOpen(false)} />
+      )}
     </article>
   )
 }

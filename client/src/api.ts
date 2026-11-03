@@ -7,6 +7,23 @@ export interface Invoice {
   amount_cents: number
   currency: string
   due_date: string
+  payment_link: PaymentLink | null
+}
+
+/** The mock Stripe link created for an invoice and the account it settles into. */
+export interface PaymentLink {
+  id: string
+  url: string
+  history_id: number
+  created_at: string
+  park: { name: string; city: string }
+  bank_account: {
+    id: number
+    bank_name: string
+    iban: string
+    currency: string
+    legal_entity: { id: number; name: string }
+  }
 }
 
 export interface SyncResult {
