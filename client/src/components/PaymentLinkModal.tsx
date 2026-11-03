@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type { Invoice, PaymentLink } from '../api.ts'
-import { formatAmount, formatDateTime } from '../format.ts'
+import { formatAmount } from '../format.ts'
 
 interface PaymentLinkModalProps {
   invoice: Invoice
@@ -10,7 +10,6 @@ interface PaymentLinkModalProps {
 
 export function PaymentLinkModal({ invoice, link, onClose }: PaymentLinkModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
-  const [copied, setCopied] = useState(false)
   const { bank_account: account, park } = link
   const titleId = `payment-link-title-${invoice.id}`
 
@@ -21,16 +20,6 @@ export function PaymentLinkModal({ invoice, link, onClose }: PaymentLinkModalPro
     const dialog = dialogRef.current
     if (dialog && !dialog.open) dialog.showModal()
   }, [])
-
-  async function copyUrl() {
-    try {
-      await navigator.clipboard.writeText(link.url)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1500)
-    } catch {
-      // Clipboard can be unavailable (e.g. non-secure context); the URL stays selectable.
-    }
-  }
 
   return (
     <dialog
