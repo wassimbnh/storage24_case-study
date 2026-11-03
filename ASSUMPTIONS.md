@@ -43,22 +43,22 @@ For invoice 1002: park 11 (München Süd) -> legal entity 2 -> bank account 2 (C
 
 **Trigger**
 
-The event is a tracking row reaching `created`, meaning the link exists and is saved. The email is queued in the same transaction that stores the link, and a worker sends it after the commit. The payment-link job never calls the email provider itself.
+The payment is confirmed: the Stripe webhook handler (design note 2) has verified the event and moved the invoice from `overdue` to `paid`. Only a confirmed payment counts: `checkout.session.completed` with `payment_status = paid`, or `checkout.session.async_payment_succeeded` for delayed methods such as SEPA Direct Debit. A session that is completed but still `unpaid` does not send a receipt.
+
+The receipt is queued in the same transaction that marks the invoice as paid, and a worker sends it after the commit. The webhook handler never calls the email provider itself, so a slow or failing provider cannot delay the `200` returned to Stripe.
 
 **Flow**
 
-1. In the same transaction as the `created` update, insert a `link_emails` row as `pending`, with a unique key on the history ID.
-2. The worker claims it (`pending -> sending`) and checks that the invoice is still overdue. If it is paid or void, it skips with a reason.
-3. It loads the customer's email from the invoice's customer and sends the link through the email provider, with an idempotency key.
-4. It sets `sent` once the provider accepts the message. The provider's delivery webhook later moves it to `delivered`.
+1. When the invoice is marked `paid`, queue a `pending` receipt row (unique per payment).
+2. A worker claims it, builds the receipt from the confirmed payment and emails it to the customer.
+3. It marks the row `sent`, or `failed` to be retried.
 
 **What could go wrong and how we guard against it**
 
 | Risk | Guard |
 |---|---|
-| Delivered to spam, or looks like phishing | Send from our own domain with SPF, DKIM and DMARC set up. Use a branded template that names the park and the invoice number, and let the link point to Stripe's known domain (`buy.stripe.com`). |
-| Never opened | Track opens and clicks through the provider. If the link is still unpaid after a few days, send one reminder and show the open invoice in the customer portal. |
-| Invoice paid before the email goes out | The worker checks that the invoice is still overdue right before sending, and skips with a reason if it is paid or void. |
+| Receipt sent twice | One receipt row per payment (unique key), claimed before sending. |
+| Email provider down | The row stays `failed` and is retried later. |
 
 ### 2. Stripe webhook success -> update invoice status in the DB
 
@@ -68,13 +68,10 @@ Stripe calls our endpoint (`POST /webhooks/stripe`) with `checkout.session.compl
 
 **Flow**
 
-1. Verify the `Stripe-Signature` header against the endpoint secret, using the raw request body. Reject anything that fails.
-2. Insert the event ID into a `stripe_events` table with a unique key. If it is already there, the event was handled before: return `200` and stop.
-3. Find the invoice from the session metadata (`invoice_id`, `history_id`) set when the link was created, never from the customer.
-4. Check that the amount and currency paid match the invoice.
-5. In one transaction: `UPDATE invoices SET status = 'paid' WHERE id = ? AND status = 'overdue'`, and insert an `overdue -> paid` row into `payment_status_history`.
-6. Deactivate the payment link (`active = false`) so it cannot be paid again.
-7. Return `200` quickly. Stripe treats a slow or failed response as a failure and retries.
+1. Verify the Stripe signature and ignore event IDs already handled.
+2. Find the invoice from the link metadata and check the amount and currency paid.
+3. In one transaction, mark the invoice `paid`, add an `overdue -> paid` history row and queue the receipt (design note 1).
+4. Deactivate the payment link and return `200` quickly.
 
 **What could go wrong and how we guard against it**
 
@@ -89,6 +86,18 @@ Stripe calls our endpoint (`POST /webhooks/stripe`) with `checkout.session.compl
 **Invoices live in our database.** A background worker reads new rows from `payment_status_history` with a cursor (`id > last_processed_id`) every minute and calls the existing sync and process steps.
 
 **Invoices live on another system.** The billing system notifies us through a webhook, `POST /webhooks/invoice-status`, whenever an invoice status changes, and we run the process.
+
+### Backend refactor
+
+We would refactor the backend into layers with a clear separation of concerns:
+
+- **Routes** only handle HTTP (parse the request, return the response) and call a service.
+- **Services** hold the business logic (sync, processing, routing) and depend on an abstract repository class, not on SQLite.
+- **Repositories** implement that abstract class and contain all the database calls.
+
+This keeps the business logic testable with a fake repository and lets the database change without touching the services.
+
+To apply it, we would write a dedicated Skill for Claude (Claude Code) that describes the target structure and the layering rules (routes call services, services call the abstract repository, only repositories touch the database). Claude would then use that Skill to refactor each module the same way, and the Skill stays in the repo to keep new code consistent with the pattern.
 
 ### Other things left out on purpose
 
