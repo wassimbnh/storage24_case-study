@@ -83,3 +83,14 @@ Stripe calls our endpoint (`POST /webhooks/stripe`) with `checkout.session.compl
 | The same event is delivered twice (Stripe delivers at least once) | Save each event ID with a unique key. If it is already saved, ignore the event. |
 | The amount or currency paid does not match the invoice | Do not mark the invoice as paid. Flag it for manual review. |
 | Our endpoint is down when Stripe calls | Stripe retries the event for up to 3 days. A daily job also checks paid sessions in Stripe and fixes any invoice still marked overdue. |
+
+## Out of scope / what we'd do next
+
+**Invoices live in our database.** A background worker reads new rows from `payment_status_history` with a cursor (`id > last_processed_id`) every minute and calls the existing sync and process steps.
+
+**Invoices live on another system.** The billing system notifies us through a webhook, `POST /webhooks/invoice-status`, whenever an invoice status changes, and we run the process.
+
+### Other things left out on purpose
+
+- The Stripe payment webhook and the customer email: covered by the design note above.
+- Authentication on the API endpoints.
