@@ -2,8 +2,6 @@
 
 Detects invoices that just became overdue, creates a mock Stripe payment link routed to the right bank account, and shows the results in a UI.
 
-> **Why a backend.** We chose to put the logic in a backend (FastAPI + SQLite) instead of the frontend, so the UI only reads results. This is more robust than a frontend-only approach: the trigger, routing and the "one link per history row" guarantee run in one place, are covered by tests, and do not depend on a browser tab staying open or on two tabs racing each other. This does affect behavior: the SQLite database is in memory and rebuilt from `schema.sql` on every server restart, so all tracking rows and created payment links are lost when the server stops. Each restart starts the demo again from the seed data.
-
 | Folder | What it is |
 | --- | --- |
 | `server/` | Backend: Python, FastAPI and SQLite, managed with [uv](https://docs.astral.sh/uv/) |
