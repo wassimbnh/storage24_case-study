@@ -2,7 +2,7 @@ import sqlite3
 
 
 def list_invoices(conn: sqlite3.Connection) -> list[dict]:
-    """Invoices with the customer name and, if one was created, the payment link. For display only."""
+    """Invoices with the customer name and either the payment link or why no link was created. For display only."""
     rows = conn.execute(
         """
         SELECT i.id, c.full_name AS customer_name, i.status, i.amount_cents,
@@ -10,7 +10,13 @@ def list_invoices(conn: sqlite3.Connection) -> list[dict]:
                p.name AS park_name, p.city AS park_city,
                t.history_id, t.url, t.stripe_payment_link_id, t.updated_at AS link_created_at,
                b.id AS bank_account_id, b.bank_name, b.iban, b.currency AS bank_currency,
-               le.id AS legal_entity_id, le.name AS legal_entity_name
+               le.id AS legal_entity_id, le.name AS legal_entity_name,
+               -- Why the invoice's latest history event did not produce a link (skipped or failed).
+               (SELECT COALESCE(lt.reason, lt.error) FROM payment_link_tracking lt
+                WHERE lt.invoice_id = i.id AND lt.status IN ('skipped', 'failed')
+                  AND NOT EXISTS (SELECT 1 FROM payment_link_tracking newer
+                                  WHERE newer.invoice_id = i.id AND newer.history_id > lt.history_id)
+               ) AS no_link_reason
         FROM invoices i
         JOIN customers c ON c.id = i.customer_id
         JOIN parks p ON p.id = i.park_id
@@ -54,4 +60,5 @@ def _to_invoice(row: sqlite3.Row) -> dict:
         "currency": row["currency"],
         "due_date": row["due_date"],
         "payment_link": payment_link,
+        "no_link_reason": None if payment_link else row["no_link_reason"],
     }

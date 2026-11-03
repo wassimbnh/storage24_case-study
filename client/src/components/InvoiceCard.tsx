@@ -52,6 +52,13 @@ export function InvoiceCard({ invoice }: { invoice: Invoice }) {
         </div>
       )}
 
+      {!link && invoice.no_link_reason && (
+        <div className="invoice-card__no-link">
+          <span className="invoice-card__no-link-title">No payment link</span>
+          <span className="invoice-card__no-link-reason">{invoice.no_link_reason}</span>
+        </div>
+      )}
+
       {link && linkOpen && (
         <PaymentLinkModal invoice={invoice} link={link} onClose={() => setLinkOpen(false)} />
       )}

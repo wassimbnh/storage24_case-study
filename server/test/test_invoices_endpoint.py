@@ -8,13 +8,13 @@ def test_invoices_endpoint_returns_seeded_invoices_with_customer_name(client):
     assert response.status_code == 200
     assert response.json() == [
         {"id": 1001, "customer_name": "Anna Keller", "status": "paid",
-         "amount_cents": 15000, "currency": "EUR", "due_date": "2026-06-15", "payment_link": None},
+         "amount_cents": 15000, "currency": "EUR", "due_date": "2026-06-15", "payment_link": None, "no_link_reason": None},
         {"id": 1002, "customer_name": "Anna Keller", "status": "overdue",
-         "amount_cents": 24000, "currency": "EUR", "due_date": "2026-07-15", "payment_link": None},
+         "amount_cents": 24000, "currency": "EUR", "due_date": "2026-07-15", "payment_link": None, "no_link_reason": None},
         {"id": 1003, "customer_name": "Marc Petit", "status": "open",
-         "amount_cents": 18000, "currency": "EUR", "due_date": "2026-08-24", "payment_link": None},
+         "amount_cents": 18000, "currency": "EUR", "due_date": "2026-08-24", "payment_link": None, "no_link_reason": None},
         {"id": 1004, "customer_name": "Julia Wagner", "status": "void",
-         "amount_cents": 9800, "currency": "EUR", "due_date": "2026-06-03", "payment_link": None},
+         "amount_cents": 9800, "currency": "EUR", "due_date": "2026-06-03", "payment_link": None, "no_link_reason": None},
     ]
 
 
@@ -53,3 +53,14 @@ def test_payment_link_disappears_after_reset(client):
     client.post("/reset")
 
     assert all(invoice["payment_link"] is None for invoice in client.get("/invoices").json())
+
+
+def test_invoices_without_link_show_the_skip_reason_of_their_latest_event(client):
+    client.post("/run")
+
+    invoices = invoices_by_id(client)
+
+    assert invoices[1001]["no_link_reason"] == "transition open -> paid is not open -> overdue"
+    assert invoices[1002]["no_link_reason"] is None
+    assert invoices[1003]["no_link_reason"] == "transition NULL -> open is not open -> overdue"
+    assert invoices[1004]["no_link_reason"] == "transition open -> void is not open -> overdue"

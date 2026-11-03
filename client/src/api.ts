@@ -8,6 +8,8 @@ export interface Invoice {
   currency: string
   due_date: string
   payment_link: PaymentLink | null
+  /** Why the latest status event did not create a link (skipped or failed); null otherwise. */
+  no_link_reason: string | null
 }
 
 /** The mock Stripe link created for an invoice and the account it settles into. */
